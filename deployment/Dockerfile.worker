@@ -1,0 +1,26 @@
+# Dockerfile voor AutoGen Marketing Team Worker
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Installeer systeemafhankelijkheden
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Kopieer requirements en installeer afhankelijkheden
+COPY deployment/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Kopieer de applicatiecode
+COPY . .
+
+# Standaard omgevingsvariabelen
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    ENVIRONMENT=production
+
+# Start de worker
+CMD ["python", "src/worker.py"]

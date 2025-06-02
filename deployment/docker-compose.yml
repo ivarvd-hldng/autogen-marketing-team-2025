@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENVIRONMENT=production
+      - ENABLE_MCP=true
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/autogen_marketing
+    depends_on:
+      - db
+      - rabbitmq
+    restart: always
+    volumes:
+      - ../logs:/app/logs
+
+  worker:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.worker
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENVIRONMENT=production
+      - ENABLE_MCP=true
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/autogen_marketing
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - db
+      - rabbitmq
+    restart: always
+    volumes:
+      - ../logs:/app/logs
+
+  streamlit:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.streamlit
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENVIRONMENT=production
+      - ENABLE_MCP=true
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - API_URL=http://web:8000
+    depends_on:
+      - web
+    restart: always
+
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=autogen_marketing
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: always
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
