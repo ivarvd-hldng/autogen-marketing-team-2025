@@ -1,0 +1,44 @@
+# Cloudflare Workers configuratie voor AutoGen Marketing Team
+
+name = "autogen-marketing-team"
+type = "javascript"
+account_id = "$CLOUDFLARE_ACCOUNT_ID"
+workers_dev = true
+compatibility_date = "2025-06-01"
+
+[vars]
+DEBUG = "false"
+ENVIRONMENT = "production"
+
+[build]
+command = "npm run build"
+
+[build.upload]
+format = "service-worker"
+
+[triggers]
+crons = []
+
+[durable_objects]
+class_names = ["AgentStateStore"]
+
+[[kv_namespaces]]
+binding = "AGENT_DATA"
+id = "$CLOUDFLARE_KV_NAMESPACE_ID"
+
+[env.staging]
+name = "autogen-marketing-team-staging"
+
+[env.staging.vars]
+DEBUG = "true"
+ENVIRONMENT = "staging"
+
+# Websocket binding voor real-time agent communicatie
+[[env.staging.durable_objects.bindings]]
+name = "AGENT_SESSIONS"
+class_name = "AgentStateStore"
+
+# AI Platform bindings
+[[ai]]
+binding = "CLAUDE"
+model = "claude-3-5-sonnet"

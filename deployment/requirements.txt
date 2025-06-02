@@ -1,0 +1,26 @@
+# Requirements voor AutoGen Marketing Team
+
+# Core Dependencies
+autogen==0.2.15
+requests==2.31.0
+python-dotenv==1.0.0
+asyncio==3.4.3
+fastapi==0.104.1
+uvicorn==0.24.0
+gunicorn==21.2.0
+
+# Web Interface
+streamlit==1.27.2
+
+# MCP Related
+pydantic==2.4.2
+websockets==11.0.3
+
+# Database
+sqlalchemy==2.0.22
+psycopg2-binary==2.9.9
+
+# Utilities
+tqdm==4.66.1
+pytz==2023.3.post1
+loguru==0.7.2
